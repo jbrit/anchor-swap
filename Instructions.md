@@ -13,7 +13,7 @@ https://github.com/jup-ag/jupiter-cpi
 
 https://github.com/solendprotocol/solend-sdk/pull/30/files#diff-0b997f36a85a30e2d3012525ee195b256a3d2437477381941c0e739744715aa2 
 
-3. Basic readme on how to run each step of your project, including anchor deployment for the first program, and .env file (wallets, etc) if relevant for either. 
+3. Basic readme on how to run each step of your project end to end, including anchor deployment for the first program, and .env file (wallets, etc) if relevant for either. 
 
 ## First, time estimates
 
