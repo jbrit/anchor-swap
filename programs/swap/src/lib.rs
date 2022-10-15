@@ -13,12 +13,10 @@ pub mod swap {
             swap_program: ctx.accounts.swap_program.to_account_info(),
             swap_state: ctx.accounts.swap_state.to_account_info(),
             pool_authority: ctx.accounts.pool_authority.to_account_info(),
-            // should be constant
             token_program: ctx.accounts.token_program.to_account_info(),
-            // all the signer in this case
+            source_token_account: ctx.accounts.source_token.to_account_info(),
+            destination_token_account: ctx.accounts.destination_token.to_account_info(),
             user_transfer_authority: ctx.accounts.authority.to_account_info(),
-            source_token_account: ctx.accounts.authority.to_account_info(),
-            destination_token_account: ctx.accounts.authority.to_account_info(),
         };
         
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
@@ -41,4 +39,8 @@ pub struct StartSwap<'info> {
     pub swap_state: UncheckedAccount<'info>,
     /// CHECK: we don't need to read it in our own program, just the cpi
     pub token_program: UncheckedAccount<'info>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    pub source_token: UncheckedAccount<'info>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    pub destination_token: UncheckedAccount<'info>,
 }
