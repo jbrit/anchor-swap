@@ -17,3 +17,4 @@ default = []
 
 [dependencies]
 anchor-lang = "0.25.0"
+jupiter-cpi = "3.0.0"
