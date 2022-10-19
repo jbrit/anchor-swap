@@ -38,7 +38,7 @@ const wallets = [
   /* view list of available wallets at https://github.com/solana-labs/wallet-adapter#wallets */
   new PhantomWalletAdapter(),
 ];
-const network = clusterApiUrl(WalletAdapterNetwork.Devnet);
+const network = clusterApiUrl(WalletAdapterNetwork.Mainnet);
 
 /* create an account  */
 const opts = {
@@ -77,7 +77,7 @@ function App() {
         anchorWallet.publicKey?.toBase58()
       );
       const swapTransaction = program.transaction.makeSwap(
-        new BN(0),
+        new BN(1),
         new BN(0),
         {
           accounts: {
@@ -96,13 +96,13 @@ function App() {
             poolAuthority: new PublicKey(
               "2dc3UgMuVkASzW4sABDjDB5PjFbPTncyECUnZL73bmQR"
             ),
-            // USDC token
+            // My USDT token address
             sourceToken: new PublicKey(
-              "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+              "4PVEWUDq9UVoxcTjbd1vnfCkjTVwcVjR1FaDXMKQav48"
             ),
-            // PAI token
+            // My PAI token address
             destinationToken: new PublicKey(
-              "Ea5SjE2Y6yvCeW5dYTn7PYMuW5ikXkvbGdcmSnXeaLjS"
+              "Azt4gz61gxAazEzZJo7WThWojQP9iVAsKVDo46UsL2wc"
             ),
             tokenProgram: new PublicKey(
               "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"

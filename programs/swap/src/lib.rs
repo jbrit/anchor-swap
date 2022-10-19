@@ -40,6 +40,7 @@ pub struct StartSwap<'info> {
     /// CHECK: we don't need to read it in our own program, just the cpi
     pub token_program: UncheckedAccount<'info>,
     /// CHECK: we don't need to read it in our own program, just the cpi
+    #[account(mut)]
     pub source_token: UncheckedAccount<'info>,
     /// CHECK: we don't need to read it in our own program, just the cpi
     pub destination_token: UncheckedAccount<'info>,
