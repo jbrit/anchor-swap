@@ -37,12 +37,12 @@ export type Swap = {
           },
           {
             "name": "sourceToken",
-            "isMut": false,
+            "isMut": true,
             "isSigner": false
           },
           {
             "name": "destinationToken",
-            "isMut": false,
+            "isMut": true,
             "isSigner": false
           }
         ],
@@ -101,12 +101,12 @@ export type Swap = {
           },
           {
             "name": "sourceToken",
-            "isMut": false,
+            "isMut": true,
             "isSigner": false
           },
           {
             "name": "destinationToken",
-            "isMut": false,
+            "isMut": true,
             "isSigner": false
           }
         ],
