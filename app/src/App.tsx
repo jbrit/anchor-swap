@@ -27,7 +27,7 @@ import {
   SolendMarket,
   flashBorrowReserveLiquidityInstruction,
   flashRepayReserveLiquidityInstruction,
-  SOLEND_DEVNET_PROGRAM_ID,
+  SOLEND_PRODUCTION_PROGRAM_ID,
 } from "@solendprotocol/solend-sdk";
 require("@solana/wallet-adapter-react-ui/styles.css");
 
@@ -125,7 +125,7 @@ function App() {
     const provider = await getProvider();
     const market = await SolendMarket.initialize(
       connection,
-      "devnet",
+      "production",
       "AAGH44cPMYSq51JZ1rth2AzBqSVass8bxwFxtEQy2L9x"
     );
     const reserve = market.reserves.find(
@@ -157,12 +157,12 @@ function App() {
     const provider = await getProvider();
     const market = await SolendMarket.initialize(
       connection,
-      "devnet",
-      // solend devnet lending market id
-      "GvjoVKNjBvQcFaSKUW1gTE7DxhSpjHbE69umVR5nPuQp"
+      "production",
+      // solend mainnet lending market id
+      "4UpD2fh7xH3VP9QQaXtsS1YY3bxzWhtfpks7FatyKvdY"
     );
     const reserve = market.reserves.find(
-      (res) => res.config.liquidityToken.symbol === "USDC"
+      (res) => res.config.liquidityToken.symbol === "USDT"
     );
     console.log(reserve)
     if (!reserve) {
@@ -181,8 +181,8 @@ function App() {
 
     tx.add(
       flashBorrowReserveLiquidityInstruction(
-        // liquidity amount
-        10,
+        // liquidity amount - $100
+        100000000,
         // source liquidity
         new PublicKey(reserve.config.liquidityAddress),
         // destination liquidity
@@ -192,12 +192,12 @@ function App() {
         // lending market
         new PublicKey(market.config!.address),
         // lending program
-        SOLEND_DEVNET_PROGRAM_ID
+        SOLEND_PRODUCTION_PROGRAM_ID
       ), 
       // Do something to increase your balance here before returning
       flashRepayReserveLiquidityInstruction(
-        // liquidity amount (must be the same)
-        10,
+        // liquidity amount (must be the same) - $100
+        100000000,
         // borrow instruction index
         0,
         // source liquidity
@@ -215,7 +215,7 @@ function App() {
         // transfer authority
         anchorWallet.publicKey,
         // lending program
-        SOLEND_DEVNET_PROGRAM_ID
+        SOLEND_PRODUCTION_PROGRAM_ID
       )
     );
 
