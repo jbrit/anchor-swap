@@ -37,12 +37,12 @@
         },
         {
           "name": "sourceToken",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "destinationToken",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         }
       ],
@@ -61,6 +61,7 @@
     }
   ],
   "metadata": {
-    "address": "J6WE4VL9J95qHUzhshSrPWQZakPHPzxJsQABjc7m6vsC"
+    "address": "8HhuYv18WABYxo5nwgxjyi4q57igCa8GCVqonqdxYUXJ",
+    "mainaddress": "HKRgB1McMjZ7gUzR6saGvQwoJ1mXNfBSCzeLo6SJSaQ4"
   }
 }
