@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use jupiter_cpi::cpi;
 
-declare_id!("HKRgB1McMjZ7gUzR6saGvQwoJ1mXNfBSCzeLo6SJSaQ4");
+declare_id!("3uMNrTxKbCN5E55uQAynh2kWAPQReandS3tjxhD85k31");
 
 #[program]
 pub mod swap {
@@ -18,9 +18,8 @@ pub mod swap {
             destination_token_account: ctx.accounts.destination_token.to_account_info(),
             user_transfer_authority: ctx.accounts.authority.to_account_info(),
         };
-        
-        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
-
+        let mut cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+        cpi_ctx = cpi_ctx.with_remaining_accounts([ctx.accounts.ra1.to_account_info(),ctx.accounts.ra2.to_account_info(),ctx.accounts.ra3.to_account_info()].to_vec());
         // setting a 0 platfprm_fee_bps
         cpi::mercurial_exchange(cpi_ctx, in_amount, minimum_out_amount, 0)
     }
@@ -46,4 +45,13 @@ pub struct StartSwap<'info> {
     /// CHECK: we don't need to read it in our own program, just the cpi
     #[account(mut)]
     pub destination_token: UncheckedAccount<'info>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    #[account(mut)]
+    pub ra1: UncheckedAccount<'info>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    #[account(mut)]
+    pub ra2: UncheckedAccount<'info>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    #[account(mut)]
+    pub ra3: UncheckedAccount<'info>,
 }

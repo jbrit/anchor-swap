@@ -34,6 +34,7 @@ require("@solana/wallet-adapter-react-ui/styles.css");
 const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID: PublicKey = new PublicKey(
   "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
 );
+
 const wallets = [
   /* view list of available wallets at https://github.com/solana-labs/wallet-adapter#wallets */
   new PhantomWalletAdapter(),
@@ -98,17 +99,26 @@ function App() {
             ),
             // My USDT token address
             sourceToken: new PublicKey(
-              "4PVEWUDq9UVoxcTjbd1vnfCkjTVwcVjR1FaDXMKQav48"
+              "8sGGwuZ2NrxLSeU9fpM3SYYQajpgTodzyLy1VKrRMc5B"
             ),
             // My PAI token address
             destinationToken: new PublicKey(
-              "Azt4gz61gxAazEzZJo7WThWojQP9iVAsKVDo46UsL2wc"
+              "FaY36VHUZCFMq3vqTsj721ohffoCx2LLNJ3HuRVWdSWR"
             ),
             tokenProgram: new PublicKey(
               "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
             ),
             // my account
             authority: anchorWallet!.publicKey,
+            ra1: new PublicKey(
+              "J7xkQZ4eCsyHR7XDMcGbHeiFZo6vXPmQC2Va8aqo8jLx"
+            ),
+            ra2: new PublicKey(
+              "bqPxs71QGXNW2SXEvjAaBgLzjhSZfQpmhcVBYoisBo6"
+            ),
+            ra3: new PublicKey(
+              "EpehbDhGq8xEc3Yy5nJ2dgY2zWRHaRsbUiMTgh36N8J7"
+            ),
           },
         }
       );
@@ -193,7 +203,7 @@ function App() {
         new PublicKey(market.config!.address),
         // lending program
         SOLEND_PRODUCTION_PROGRAM_ID
-      ), 
+      ),
       // Do something to increase your balance here before returning
       flashRepayReserveLiquidityInstruction(
         // liquidity amount (must be the same) - $100
