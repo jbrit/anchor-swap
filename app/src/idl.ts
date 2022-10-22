@@ -44,6 +44,21 @@ export type Swap = {
             "name": "destinationToken",
             "isMut": true,
             "isSigner": false
+          },
+          {
+            "name": "ra1",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "ra2",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "ra3",
+            "isMut": true,
+            "isSigner": false
           }
         ],
         "args": [
@@ -61,7 +76,7 @@ export type Swap = {
       }
     ]
   };
-  
+
   export const IDL: Swap = {
     "version": "0.1.0",
     "name": "swap",
@@ -108,6 +123,21 @@ export type Swap = {
             "name": "destinationToken",
             "isMut": true,
             "isSigner": false
+          },
+          {
+            "name": "ra1",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "ra2",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "ra3",
+            "isMut": true,
+            "isSigner": false
           }
         ],
         "args": [
@@ -125,4 +155,3 @@ export type Swap = {
       }
     ]
   };
-  

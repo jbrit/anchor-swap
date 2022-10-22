@@ -44,6 +44,21 @@
           "name": "destinationToken",
           "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "ra1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "ra2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "ra3",
+          "isMut": true,
+          "isSigner": false
         }
       ],
       "args": [
@@ -61,7 +76,6 @@
     }
   ],
   "metadata": {
-    "address": "8HhuYv18WABYxo5nwgxjyi4q57igCa8GCVqonqdxYUXJ",
-    "mainaddress": "HKRgB1McMjZ7gUzR6saGvQwoJ1mXNfBSCzeLo6SJSaQ4"
+    "address": "3uMNrTxKbCN5E55uQAynh2kWAPQReandS3tjxhD85k31"
   }
 }
