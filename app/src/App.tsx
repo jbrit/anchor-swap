@@ -77,55 +77,67 @@ function App() {
         "provider.wallet.publicKey: ",
         anchorWallet.publicKey?.toBase58()
       );
-      const swapTransaction = program.transaction.makeSwap(
+      const swapTransaction = await program.methods.makeSwap(
         new BN(1),
         new BN(0),
+      ).accounts(
         {
-          accounts: {
-            jupiterProgram: new PublicKey(
-              "JUP3c2Uh3WA4Ng34tw6kPd2G4C5BB21Xo36Je1s32Ph"
-            ),
-            // Mecurial swap program
-            swapProgram: new PublicKey(
-              "MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky"
-            ),
-            // Mercurial PAI 3-Pool (USDC-USDT-PAI)
-            swapState: new PublicKey(
-              "SWABtvDnJwWwAb9CbSA3nv7nTnrtYjrACAVtuP3gyBB"
-            ),
-            // PAI 3-pool authority
-            poolAuthority: new PublicKey(
-              "2dc3UgMuVkASzW4sABDjDB5PjFbPTncyECUnZL73bmQR"
-            ),
-            // My USDT token address
-            sourceToken: new PublicKey(
-              "8sGGwuZ2NrxLSeU9fpM3SYYQajpgTodzyLy1VKrRMc5B"
-            ),
-            // My PAI token address
-            destinationToken: new PublicKey(
-              "FaY36VHUZCFMq3vqTsj721ohffoCx2LLNJ3HuRVWdSWR"
-            ),
-            tokenProgram: new PublicKey(
-              "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-            ),
-            // my account
-            authority: anchorWallet!.publicKey,
-            ra1: new PublicKey(
-              "J7xkQZ4eCsyHR7XDMcGbHeiFZo6vXPmQC2Va8aqo8jLx"
-            ),
-            ra2: new PublicKey(
-              "bqPxs71QGXNW2SXEvjAaBgLzjhSZfQpmhcVBYoisBo6"
-            ),
-            ra3: new PublicKey(
-              "EpehbDhGq8xEc3Yy5nJ2dgY2zWRHaRsbUiMTgh36N8J7"
-            ),
-          },
+          jupiterProgram: new PublicKey(
+            "JUP3c2Uh3WA4Ng34tw6kPd2G4C5BB21Xo36Je1s32Ph"
+          ),
+          // Mecurial swap program
+          swapProgram: new PublicKey(
+            "MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky"
+          ),
+          // Mercurial PAI 3-Pool (USDC-USDT-PAI)
+          swapState: new PublicKey(
+            "SWABtvDnJwWwAb9CbSA3nv7nTnrtYjrACAVtuP3gyBB"
+          ),
+          // PAI 3-pool authority
+          poolAuthority: new PublicKey(
+            "2dc3UgMuVkASzW4sABDjDB5PjFbPTncyECUnZL73bmQR"
+          ),
+          // My USDT token address
+          sourceToken: new PublicKey(
+            "8sGGwuZ2NrxLSeU9fpM3SYYQajpgTodzyLy1VKrRMc5B"
+          ),
+          // My PAI token address
+          destinationToken: new PublicKey(
+            "FaY36VHUZCFMq3vqTsj721ohffoCx2LLNJ3HuRVWdSWR"
+          ),
+          tokenProgram: new PublicKey(
+            "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          ),
+          // my account
+          authority: anchorWallet!.publicKey,
         }
-      );
-      const res = await provider.sendAndConfirm(swapTransaction);
+      ).remainingAccounts([
+        {
+          pubkey: new PublicKey(
+            "J7xkQZ4eCsyHR7XDMcGbHeiFZo6vXPmQC2Va8aqo8jLx"
+          ),
+          isSigner: false,
+          isWritable: true
+        },
+        {
+          pubkey: new PublicKey(
+            "bqPxs71QGXNW2SXEvjAaBgLzjhSZfQpmhcVBYoisBo6"
+          ),
+          isSigner: false,
+          isWritable: true
+        },
+        {
+          pubkey: new PublicKey(
+            "EpehbDhGq8xEc3Yy5nJ2dgY2zWRHaRsbUiMTgh36N8J7"
+          ),
+          isSigner: false,
+          isWritable: true
+        },
+      ]).rpc();
+      // const res = await provider.sendAndConfirm(swapTransaction);
       // const res = await anchorWallet!.signTransaction!(swapTransaction);
 
-      console.log("account: ", res);
+      console.log("account: ", swapTransaction);
     } catch (err) {
       console.log("Transaction error: ", err);
     }

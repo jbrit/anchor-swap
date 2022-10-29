@@ -44,21 +44,6 @@
           "name": "destinationToken",
           "isMut": true,
           "isSigner": false
-        },
-        {
-          "name": "ra1",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "ra2",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "ra3",
-          "isMut": true,
-          "isSigner": false
         }
       ],
       "args": [
@@ -76,6 +61,6 @@
     }
   ],
   "metadata": {
-    "address": "3uMNrTxKbCN5E55uQAynh2kWAPQReandS3tjxhD85k31"
+    "address": "4NDjSubeiiiAg6Y11crMVAjmqNLcHWiJvo9bk9G8Jemn"
   }
 }
