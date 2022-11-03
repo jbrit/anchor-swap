@@ -2,6 +2,7 @@ mod program_accounts;
 use anchor_lang::prelude::*;
 use jupiter_cpi::cpi;
 mod amm;
+mod errors;
 
 declare_id!("4NDjSubeiiiAg6Y11crMVAjmqNLcHWiJvo9bk9G8Jemn");
 
@@ -9,7 +10,11 @@ declare_id!("4NDjSubeiiiAg6Y11crMVAjmqNLcHWiJvo9bk9G8Jemn");
 pub mod swap {
     use super::*;
 
-    pub fn make_swap<'info>(ctx: Context<'_, '_, '_, 'info, StartSwap<'info>>, in_amount: Option<u64>, minimum_out_amount: u64) -> Result<()> {
+    pub fn make_swap<'info>(
+        ctx: Context<'_, '_, '_, 'info, StartSwap<'info>>,
+        in_amount: Option<u64>,
+        minimum_out_amount: u64,
+    ) -> Result<()> {
         let cpi_program = ctx.accounts.jupiter_program.to_account_info();
         let cpi_accounts = cpi::accounts::MercurialExchange {
             swap_program: ctx.accounts.swap_program.to_account_info(),
@@ -26,15 +31,39 @@ pub mod swap {
         cpi::mercurial_exchange(cpi_ctx, in_amount, minimum_out_amount, 0)
     }
 
-    pub fn mercurial_raydium<'info>(ctx: Context<'_, '_, '_, 'info, MercurialRaydium<'info>>) -> Result<()> {
-        let mut x = [0.0,0.0] as [f64; 2];
-        let mut y = [0.0,0.0] as [f64; 2];
+    pub fn mercurial_raydium<'info>(
+        ctx: Context<'_, '_, '_, 'info, MercurialRaydium<'info>>,
+    ) -> Result<()> {
+        // TODO: get the actual reserves here or as an argument
+        let mut x = [0.0, 0.0] as [f64; 2];
+        let mut y = [0.0, 0.0] as [f64; 2];
 
-        let in_amount = amm::get_optimal_input( &mut x, &mut y);
-        let out_amount = 0 as u64;
-        // cpi::mercurial_exchange(ctx.accounts.mercurial_ctx(), in_amount, minimum_out_amount, 0)
-        // cpi::raydium_swap_v2(ctx.accounts.raydium_ctx(), in_amount, minimum_out_amount, 0)
-        Ok(())
+        let in_amount = amm::get_optimal_input(&mut x, &mut y);
+        // convert to Option u64
+        let mercurial_in_amount = Some(in_amount as u64);
+        let mercurial_out_amount = amm::get_amount_out(in_amount, &mut x, &mut y) as u64;
+        // out amount from mercurial exchange is in amount for raydium
+        let raydium_in_amount = Some(mercurial_out_amount);
+        let raydium_out_amount =
+            amm::get_amount_out(raydium_in_amount.unwrap() as f64, &mut x, &mut y) as u64;
+
+        match raydium_out_amount > mercurial_in_amount.unwrap() {
+            true => {
+                cpi::mercurial_exchange(
+                    ctx.accounts.mercurial_ctx(),
+                    mercurial_in_amount,
+                    mercurial_out_amount,
+                    0,
+                )?;
+                cpi::raydium_swap_v2(
+                    ctx.accounts.raydium_ctx(),
+                    raydium_in_amount,
+                    raydium_out_amount,
+                    0,
+                )
+            }
+            false => err!(errors::SwapError::NotProfitableOpportunity),
+        }
     }
 }
 
@@ -61,7 +90,7 @@ pub struct StartSwap<'info> {
     // expecting first 3 accounts to be passed in for mercurial exchange
 }
 
-// Path: programs/swap/src/program_accounts.rs
+// Path: programs/swap/src/program_accounts.rs (couldn't find a way to import this properly)
 #[derive(Accounts)]
 pub struct MercurialRaydium<'info> {
     pub jupiter_program: Program<'info, jupiter_cpi::program::Jupiter>,
@@ -84,9 +113,10 @@ pub struct MercurialRaydium<'info> {
     pub destination_token: UncheckedAccount<'info>,
 }
 
-
 impl<'info> MercurialRaydium<'info> {
-    pub fn mercurial_ctx(&self) -> CpiContext<'_, '_, '_, 'info, cpi::accounts::MercurialExchange<'info>> {
+    pub fn mercurial_ctx(
+        &self,
+    ) -> CpiContext<'_, '_, '_, 'info, cpi::accounts::MercurialExchange<'info>> {
         let cpi_program = self.jupiter_program.to_account_info();
         let cpi_accounts = cpi::accounts::MercurialExchange {
             swap_program: self.swap_program.to_account_info(),
@@ -97,12 +127,14 @@ impl<'info> MercurialRaydium<'info> {
             destination_token_account: self.destination_token.to_account_info(),
             user_transfer_authority: self.authority.to_account_info(),
         };
-        
+
         CpiContext::new(cpi_program, cpi_accounts)
     }
 
-    pub fn raydium_ctx(&self) -> CpiContext<'_, '_, '_, 'info, cpi::accounts::RaydiumSwapV2<'info>> {
-        // work out the correct account mapping here
+    pub fn raydium_ctx(
+        &self,
+    ) -> CpiContext<'_, '_, '_, 'info, cpi::accounts::RaydiumSwapV2<'info>> {
+        // TODO: work out the correct account mapping here
         let cpi_program = self.jupiter_program.to_account_info();
         let cpi_accounts = cpi::accounts::RaydiumSwapV2 {
             amm_id: self.swap_program.to_account_info(),
@@ -126,5 +158,4 @@ impl<'info> MercurialRaydium<'info> {
         };
         CpiContext::new(cpi_program, cpi_accounts)
     }
-
 }
