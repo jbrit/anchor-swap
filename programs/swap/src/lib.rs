@@ -50,7 +50,9 @@ pub mod swap {
         match raydium_out_amount > mercurial_in_amount.unwrap() {
             true => {
                 match cpi::mercurial_exchange(
-                    ctx.accounts.mercurial_ctx(),
+                    ctx.accounts
+                        .mercurial_ctx()
+                        .with_remaining_accounts(ctx.remaining_accounts.to_vec()),
                     mercurial_in_amount,
                     mercurial_out_amount,
                     0,
@@ -102,7 +104,6 @@ pub struct MercurialRaydium<'info> {
     pub token_program: UncheckedAccount<'info>,
 
     // mercurial exchange
-
     /// CHECK: we don't need to read it in our own program, just the cpi
     pub swap_program: UncheckedAccount<'info>,
     /// CHECK: we don't need to read it in our own program, just the cpi
@@ -116,9 +117,8 @@ pub struct MercurialRaydium<'info> {
     /// CHECK: we don't need to read it in our own program, just the cpi
     #[account(mut)]
     pub destination_token: UncheckedAccount<'info>,
-    
-    // raydium accounts
 
+    // raydium accounts
     /// CHECK: we don't need to read it in our own program, just the cpi
     pub raydium_swap_program: UncheckedAccount<'info>,
     /// CHECK: we don't need to read it in our own program, just the cpi
@@ -157,7 +157,6 @@ pub struct MercurialRaydium<'info> {
     pub serum_pc_vault_account: UncheckedAccount<'info>,
     /// CHECK: we don't need to read it in our own program, just the cpi
     pub serum_vault_signer: UncheckedAccount<'info>,
-    
 }
 
 impl<'info> MercurialRaydium<'info> {
