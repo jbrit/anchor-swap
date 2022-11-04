@@ -3,6 +3,7 @@ use anchor_lang::prelude::*;
 use jupiter_cpi::cpi;
 mod amm;
 mod errors;
+use anchor_spl::token::TokenAccount;
 
 declare_id!("4NDjSubeiiiAg6Y11crMVAjmqNLcHWiJvo9bk9G8Jemn");
 
@@ -111,12 +112,10 @@ pub struct MercurialRaydium<'info> {
     /// CHECK: we don't need to read it in our own program, just the cpi
     pub swap_state: UncheckedAccount<'info>,
     // source and destination token accounts need to be mutable by the CPI program
-    /// CHECK: we don't need to read it in our own program, just the cpi
     #[account(mut)]
-    pub source_token: UncheckedAccount<'info>,
-    /// CHECK: we don't need to read it in our own program, just the cpi
+    pub source_token: Account<'info, TokenAccount>,
     #[account(mut)]
-    pub destination_token: UncheckedAccount<'info>,
+    pub destination_token: Account<'info, TokenAccount>,
 
     // raydium accounts
     /// CHECK: we don't need to read it in our own program, just the cpi
@@ -130,14 +129,10 @@ pub struct MercurialRaydium<'info> {
     #[account(mut)]
     pub amm_open_orders: UncheckedAccount<'info>,
     /// CHECK: we don't need to read it in our own program, just the cpi
-    #[account(mut)]
-    pub pool_coin_token_account: UncheckedAccount<'info>,
-    /// CHECK: we don't need to read it in our own program, just the cpi
-    #[account(mut)]
-    pub pool_pc_token_account: UncheckedAccount<'info>,
-    /// CHECK: we don't need to read it in our own program, just the cpi
     pub serum_program_id: UncheckedAccount<'info>,
     /// CHECK: we don't need to read it in our own program, just the cpi
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    pub serum_vault_signer: UncheckedAccount<'info>,
     #[account(mut)]
     pub serum_market: UncheckedAccount<'info>,
     /// CHECK: we don't need to read it in our own program, just the cpi
@@ -149,14 +144,16 @@ pub struct MercurialRaydium<'info> {
     /// CHECK: we don't need to read it in our own program, just the cpi
     #[account(mut)]
     pub serum_event_queue: UncheckedAccount<'info>,
-    /// CHECK: we don't need to read it in our own program, just the cpi
+
+    // token accounts
     #[account(mut)]
-    pub serum_coin_vault_account: UncheckedAccount<'info>,
-    /// CHECK: we don't need to read it in our own program, just the cpi
+    pub serum_coin_vault_account: Account<'info, TokenAccount>,
     #[account(mut)]
-    pub serum_pc_vault_account: UncheckedAccount<'info>,
-    /// CHECK: we don't need to read it in our own program, just the cpi
-    pub serum_vault_signer: UncheckedAccount<'info>,
+    pub serum_pc_vault_account: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub pool_coin_token_account: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub pool_pc_token_account: Account<'info, TokenAccount>,
 }
 
 impl<'info> MercurialRaydium<'info> {
