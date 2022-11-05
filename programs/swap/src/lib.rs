@@ -36,17 +36,21 @@ pub mod swap {
         ctx: Context<'_, '_, '_, 'info, MercurialRaydium<'info>>,
     ) -> Result<()> {
         // TODO: get the actual reserves here or as an argument
-        let mut x = [0.0, 0.0] as [f64; 2];
-        let mut y = [0.0, 0.0] as [f64; 2];
+        let mut mercurial_reserves = [0.0, 0.0] as [f64; 2];
+        let mut raydium_reserves = [
+            ctx.accounts.pool_coin_token_account.amount as f64,
+            ctx.accounts.pool_pc_token_account.amount as f64,
+        ] as [f64; 2];
 
-        let in_amount = amm::get_optimal_input(&mut x, &mut y);
+
+        let in_amount = amm::get_optimal_input(&mut mercurial_reserves, &mut raydium_reserves);
         // convert to Option u64
         let mercurial_in_amount = Some(in_amount as u64);
-        let mercurial_out_amount = amm::get_amount_out(in_amount, &mut x, &mut y) as u64;
+        let mercurial_out_amount = amm::get_amount_out(in_amount, &mut mercurial_reserves, &mut raydium_reserves) as u64;
         // out amount from mercurial exchange is in amount for raydium
         let raydium_in_amount = Some(mercurial_out_amount);
         let raydium_out_amount =
-            amm::get_amount_out(raydium_in_amount.unwrap() as f64, &mut x, &mut y) as u64;
+            amm::get_amount_out(raydium_in_amount.unwrap() as f64, &mut mercurial_reserves, &mut raydium_reserves) as u64;
 
         match raydium_out_amount > mercurial_in_amount.unwrap() {
             true => {
