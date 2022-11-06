@@ -36,6 +36,7 @@ pub mod swap {
         ctx: Context<'_, '_, '_, 'info, MercurialRaydium<'info>>,
     ) -> Result<()> {
         // TODO: get the actual reserves here or as an argument
+        // can't check remaining account reserves
         let mut mercurial_reserves = [0.0, 0.0] as [f64; 2];
         let mut raydium_reserves = [
             ctx.accounts.pool_coin_token_account.amount as f64,
