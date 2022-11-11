@@ -43,15 +43,18 @@ pub mod swap {
             ctx.accounts.pool_pc_token_account.amount as f64,
         ] as [f64; 2];
 
-
         let in_amount = amm::get_optimal_input(&mut mercurial_reserves, &mut raydium_reserves);
         // convert to Option u64
         let mercurial_in_amount = Some(in_amount as u64);
-        let mercurial_out_amount = amm::get_amount_out(in_amount, &mut mercurial_reserves, &mut raydium_reserves) as u64;
+        let mercurial_out_amount =
+            amm::get_amount_out(in_amount, &mut mercurial_reserves, &mut raydium_reserves) as u64;
         // out amount from mercurial exchange is in amount for raydium
         let raydium_in_amount = Some(mercurial_out_amount);
-        let raydium_out_amount =
-            amm::get_amount_out(raydium_in_amount.unwrap() as f64, &mut mercurial_reserves, &mut raydium_reserves) as u64;
+        let raydium_out_amount = amm::get_amount_out(
+            raydium_in_amount.unwrap() as f64,
+            &mut mercurial_reserves,
+            &mut raydium_reserves,
+        ) as u64;
 
         match raydium_out_amount > mercurial_in_amount.unwrap() {
             true => {
@@ -206,4 +209,39 @@ impl<'info> MercurialRaydium<'info> {
         };
         CpiContext::new(cpi_program, cpi_accounts)
     }
+}
+
+#[derive(Accounts)]
+pub struct AldrinOrca<'info> {
+    pub jupiter_program: Program<'info, jupiter_cpi::program::Jupiter>,
+    pub wallet_authority: Signer<'info>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    pub token_program: UncheckedAccount<'info>,
+
+    // aldrin specific
+    
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    pub swap_program: UncheckedAccount<'info>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    pub pool: UncheckedAccount<'info>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    pub pool_signer: UncheckedAccount<'info>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    #[account(mut)]
+    pub pool_mint: UncheckedAccount<'info>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    #[account(mut)]
+    pub base_token_vault: Account<'info, TokenAccount>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    #[account(mut)]
+    pub quote_token_vault: Account<'info, TokenAccount>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    #[account(mut)]
+    pub fee_pool_token_account: Account<'info, TokenAccount>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    #[account(mut)]
+    pub user_base_token_account: Account<'info, TokenAccount>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    #[account(mut)]
+    pub user_quote_token_account: Account<'info, TokenAccount>,
 }
