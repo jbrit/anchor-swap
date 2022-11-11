@@ -219,7 +219,7 @@ pub struct AldrinOrca<'info> {
     pub token_program: UncheckedAccount<'info>,
 
     // aldrin specific
-    
+
     /// CHECK: we don't need to read it in our own program, just the cpi
     pub swap_program: UncheckedAccount<'info>,
     /// CHECK: we don't need to read it in our own program, just the cpi
@@ -228,20 +228,36 @@ pub struct AldrinOrca<'info> {
     pub pool_signer: UncheckedAccount<'info>,
     /// CHECK: we don't need to read it in our own program, just the cpi
     #[account(mut)]
-    pub pool_mint: UncheckedAccount<'info>,
-    /// CHECK: we don't need to read it in our own program, just the cpi
+    pub aldrin_pool_mint: UncheckedAccount<'info>,
     #[account(mut)]
     pub base_token_vault: Account<'info, TokenAccount>,
-    /// CHECK: we don't need to read it in our own program, just the cpi
     #[account(mut)]
     pub quote_token_vault: Account<'info, TokenAccount>,
-    /// CHECK: we don't need to read it in our own program, just the cpi
     #[account(mut)]
     pub fee_pool_token_account: Account<'info, TokenAccount>,
-    /// CHECK: we don't need to read it in our own program, just the cpi
     #[account(mut)]
     pub user_base_token_account: Account<'info, TokenAccount>,
-    /// CHECK: we don't need to read it in our own program, just the cpi
     #[account(mut)]
     pub user_quote_token_account: Account<'info, TokenAccount>,
+
+    // orca specific
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    pub token_swap_program: UncheckedAccount<'info>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    pub swap: UncheckedAccount<'info>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    pub authority: UncheckedAccount<'info>,
+    #[account(mut)]
+    pub source: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub swap_source: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub swap_destination: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub destination: Account<'info, TokenAccount>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    #[account(mut)]
+    pub orca_pool_mint: UncheckedAccount<'info>,
+    #[account(mut)]
+    pub pool_fee: Account<'info, TokenAccount>,
 }
