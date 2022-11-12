@@ -1,6 +1,7 @@
 mod program_accounts;
 use anchor_lang::prelude::*;
 use jupiter_cpi::cpi;
+use jupiter_cpi::typedefs::Side;
 mod amm;
 mod errors;
 use anchor_spl::token::TokenAccount;
@@ -72,6 +73,48 @@ pub mod swap {
                         raydium_out_amount,
                         0,
                     ),
+                    Err(e) => Err(e),
+                }
+            }
+            false => err!(errors::SwapError::NotProfitableOpportunity),
+        }
+    }
+
+    pub fn aldrin_orca<'info>(ctx: Context<'_, '_, '_, 'info, AldrinOrca<'info>>) -> Result<()> {
+        let mut aldrin_reserves = [
+            ctx.accounts.base_token_vault.amount as f64,
+            ctx.accounts.quote_token_vault.amount as f64,
+        ] as [f64; 2];
+        let mut orca_reserves = [
+            ctx.accounts.swap_source.amount as f64,
+            ctx.accounts.swap_destination.amount as f64,
+        ] as [f64; 2];
+
+        let in_amount = amm::get_optimal_input(&mut aldrin_reserves, &mut orca_reserves);
+        // convert to Option u64
+        let aldrin_in_amount = Some(in_amount as u64);
+        let aldrin_out_amount =
+            amm::get_amount_out(in_amount, &mut aldrin_reserves, &mut orca_reserves) as u64;
+        // out amount from aldrin exchange is in amount for orca
+        let orca_in_amount = Some(aldrin_out_amount);
+        let orca_out_amount = amm::get_amount_out(
+            orca_in_amount.unwrap() as f64,
+            &mut aldrin_reserves,
+            &mut orca_reserves,
+        ) as u64;
+
+        match orca_out_amount > aldrin_in_amount.unwrap() {
+            true => {
+                match cpi::aldrin_swap(
+                    ctx.accounts.aldrin_ctx(),
+                    aldrin_in_amount,
+                    aldrin_out_amount,
+                    Side::Bid,
+                    0,
+                ) {
+                    Ok(_) => {
+                        cpi::token_swap(ctx.accounts.orca_ctx(), orca_in_amount, orca_out_amount, 0)
+                    }
                     Err(e) => Err(e),
                 }
             }
@@ -219,7 +262,6 @@ pub struct AldrinOrca<'info> {
     pub token_program: UncheckedAccount<'info>,
 
     // aldrin specific
-
     /// CHECK: we don't need to read it in our own program, just the cpi
     pub swap_program: UncheckedAccount<'info>,
     /// CHECK: we don't need to read it in our own program, just the cpi
@@ -260,4 +302,44 @@ pub struct AldrinOrca<'info> {
     pub orca_pool_mint: UncheckedAccount<'info>,
     #[account(mut)]
     pub pool_fee: Account<'info, TokenAccount>,
+}
+
+impl<'info> AldrinOrca<'info> {
+    pub fn aldrin_ctx(&self) -> CpiContext<'_, '_, '_, 'info, cpi::accounts::AldrinSwap<'info>> {
+        let cpi_program = self.jupiter_program.to_account_info();
+        let cpi_accounts = cpi::accounts::AldrinSwap {
+            swap_program: self.swap_program.to_account_info(),
+            pool: self.pool.to_account_info(),
+            pool_signer: self.pool_signer.to_account_info(),
+            pool_mint: self.aldrin_pool_mint.to_account_info(),
+            base_token_vault: self.base_token_vault.to_account_info(),
+            quote_token_vault: self.quote_token_vault.to_account_info(),
+            fee_pool_token_account: self.fee_pool_token_account.to_account_info(),
+            user_base_token_account: self.user_base_token_account.to_account_info(),
+            user_quote_token_account: self.user_quote_token_account.to_account_info(),
+            token_program: self.token_program.to_account_info(),
+            wallet_authority: self.wallet_authority.to_account_info(),
+        };
+
+        CpiContext::new(cpi_program, cpi_accounts)
+    }
+
+    pub fn orca_ctx(&self) -> CpiContext<'_, '_, '_, 'info, cpi::accounts::TokenSwap<'info>> {
+        let cpi_program = self.jupiter_program.to_account_info();
+        let cpi_accounts = cpi::accounts::TokenSwap {
+            token_swap_program: self.token_swap_program.to_account_info(),
+            swap: self.swap.to_account_info(),
+            authority: self.authority.to_account_info(),
+            source: self.source.to_account_info(),
+            swap_source: self.swap_source.to_account_info(),
+            swap_destination: self.swap_destination.to_account_info(),
+            destination: self.destination.to_account_info(),
+            pool_mint: self.orca_pool_mint.to_account_info(),
+            pool_fee: self.pool_fee.to_account_info(),
+            token_program: self.token_program.to_account_info(),
+            user_transfer_authority: self.wallet_authority.to_account_info(),
+        };
+
+        CpiContext::new(cpi_program, cpi_accounts)
+    }
 }
