@@ -6,7 +6,7 @@ mod amm;
 mod errors;
 use anchor_spl::token::TokenAccount;
 
-declare_id!("4NDjSubeiiiAg6Y11crMVAjmqNLcHWiJvo9bk9G8Jemn");
+declare_id!("BeTX9jpRTDKPUCH3rNuNwERQNp3fHxoE1beFFGeVaicG");
 
 #[program]
 pub mod swap {
@@ -82,15 +82,17 @@ pub mod swap {
 
     pub fn aldrin_orca<'info>(ctx: Context<'_, '_, '_, 'info, AldrinOrca<'info>>) -> Result<()> {
         let mut aldrin_reserves = [
-            ctx.accounts.base_token_vault.amount as f64,
             ctx.accounts.quote_token_vault.amount as f64,
+            ctx.accounts.swap_source.amount as f64,
         ] as [f64; 2];
         let mut orca_reserves = [
-            ctx.accounts.swap_source.amount as f64,
+            ctx.accounts.base_token_vault.amount as f64,
             ctx.accounts.swap_destination.amount as f64,
         ] as [f64; 2];
-
+        msg!("Aldrin Reserves : {:?}", aldrin_reserves);
+        msg!("Orca Reserves : {:?}", orca_reserves);
         let in_amount = amm::get_optimal_input(&mut aldrin_reserves, &mut orca_reserves);
+        msg!("OI : {}", in_amount);
         // convert to Option u64
         let aldrin_in_amount = Some(in_amount as u64);
         let aldrin_out_amount =
@@ -102,7 +104,8 @@ pub mod swap {
             &mut aldrin_reserves,
             &mut orca_reserves,
         ) as u64;
-
+        msg!("Orca Out Amount : {}", orca_out_amount);
+        msg!("Aldrin OI : {}", aldrin_in_amount.unwrap());
         match orca_out_amount > aldrin_in_amount.unwrap() {
             true => {
                 match cpi::aldrin_swap(
@@ -164,9 +167,9 @@ pub struct MercurialRaydium<'info> {
     pub swap_state: UncheckedAccount<'info>,
     // source and destination token accounts need to be mutable by the CPI program
     #[account(mut)]
-    pub source_token: Account<'info, TokenAccount>,
+    pub source_token: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
-    pub destination_token: Account<'info, TokenAccount>,
+    pub destination_token: Box<Account<'info, TokenAccount>>,
 
     // raydium accounts
     /// CHECK: we don't need to read it in our own program, just the cpi
@@ -182,8 +185,8 @@ pub struct MercurialRaydium<'info> {
     /// CHECK: we don't need to read it in our own program, just the cpi
     pub serum_program_id: UncheckedAccount<'info>,
     /// CHECK: we don't need to read it in our own program, just the cpi
-    /// CHECK: we don't need to read it in our own program, just the cpi
     pub serum_vault_signer: UncheckedAccount<'info>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
     #[account(mut)]
     pub serum_market: UncheckedAccount<'info>,
     /// CHECK: we don't need to read it in our own program, just the cpi
@@ -198,13 +201,13 @@ pub struct MercurialRaydium<'info> {
 
     // token accounts
     #[account(mut)]
-    pub serum_coin_vault_account: Account<'info, TokenAccount>,
+    pub serum_coin_vault_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
-    pub serum_pc_vault_account: Account<'info, TokenAccount>,
+    pub serum_pc_vault_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
-    pub pool_coin_token_account: Account<'info, TokenAccount>,
+    pub pool_coin_token_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
-    pub pool_pc_token_account: Account<'info, TokenAccount>,
+    pub pool_pc_token_account: Box<Account<'info, TokenAccount>>,
 }
 
 impl<'info> MercurialRaydium<'info> {
@@ -272,15 +275,15 @@ pub struct AldrinOrca<'info> {
     #[account(mut)]
     pub aldrin_pool_mint: UncheckedAccount<'info>,
     #[account(mut)]
-    pub base_token_vault: Account<'info, TokenAccount>,
+    pub base_token_vault: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
-    pub quote_token_vault: Account<'info, TokenAccount>,
+    pub quote_token_vault: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
-    pub fee_pool_token_account: Account<'info, TokenAccount>,
+    pub fee_pool_token_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
-    pub user_base_token_account: Account<'info, TokenAccount>,
+    pub user_base_token_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
-    pub user_quote_token_account: Account<'info, TokenAccount>,
+    pub user_quote_token_account: Box<Account<'info, TokenAccount>>,
 
     // orca specific
     /// CHECK: we don't need to read it in our own program, just the cpi
@@ -290,18 +293,18 @@ pub struct AldrinOrca<'info> {
     /// CHECK: we don't need to read it in our own program, just the cpi
     pub authority: UncheckedAccount<'info>,
     #[account(mut)]
-    pub source: Account<'info, TokenAccount>,
+    pub source: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
-    pub swap_source: Account<'info, TokenAccount>,
+    pub swap_source: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
-    pub swap_destination: Account<'info, TokenAccount>,
+    pub swap_destination: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
-    pub destination: Account<'info, TokenAccount>,
+    pub destination: Box<Account<'info, TokenAccount>>,
     /// CHECK: we don't need to read it in our own program, just the cpi
     #[account(mut)]
     pub orca_pool_mint: UncheckedAccount<'info>,
     #[account(mut)]
-    pub pool_fee: Account<'info, TokenAccount>,
+    pub pool_fee: Box<Account<'info, TokenAccount>>,
 }
 
 impl<'info> AldrinOrca<'info> {
