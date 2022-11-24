@@ -11,8 +11,6 @@ declare_id!("BeTX9jpRTDKPUCH3rNuNwERQNp3fHxoE1beFFGeVaicG");
 
 #[program]
 pub mod swap {
-    use crate::swaps::make_generic_swap;
-
     use super::*;
 
     pub fn make_swap<'info>(
@@ -134,11 +132,55 @@ pub mod swap {
         in_amount: Option<u64>,
         minimum_out_amount: u64,
     ) -> Result<()> {
-        make_generic_swap(
+        swaps::make_generic_swap(
             exchange_id,
             0,
             in_amount,
             minimum_out_amount,
+            &ctx.accounts.jupiter_program,
+            &ctx.accounts.wallet_authority,
+            &ctx.accounts.token_program,
+            ctx.remaining_accounts,
+        )
+    }
+
+    pub fn generic_aldrin_orca<'info>(
+        ctx: Context<'_, '_, '_, 'info, GenericSwap<'info>>,
+    ) -> Result<()> {
+        let exchanges = [1, 0] as [u8; 2];
+        let mut aldrin = swaps::get_exchange_info(exchanges[0], 0, ctx.remaining_accounts);
+        let mut orca =
+            swaps::get_exchange_info(exchanges[1], aldrin.account_count, ctx.remaining_accounts);
+        let aldrin_in_amount =
+            Some(amm::get_optimal_input(&mut aldrin.reserves, &mut orca.reserves) as u64);
+        let aldrin_out_amount = amm::get_amount_out(
+            aldrin_in_amount.unwrap() as f64,
+            &mut aldrin.reserves,
+            &mut orca.reserves,
+        ) as u64;
+        let orca_in_amount = Some(aldrin_out_amount);
+        let orca_out_amount = amm::get_amount_out(
+            orca_in_amount.unwrap() as f64,
+            &mut aldrin.reserves,
+            &mut orca.reserves,
+        ) as u64;
+
+        swaps::make_generic_swap(
+            exchanges[0],
+            0,
+            aldrin_in_amount,
+            aldrin_out_amount,
+            &ctx.accounts.jupiter_program,
+            &ctx.accounts.wallet_authority,
+            &ctx.accounts.token_program,
+            ctx.remaining_accounts,
+        )?;
+
+        swaps::make_generic_swap(
+            exchanges[1],
+            aldrin.account_count,
+            orca_in_amount,
+            orca_out_amount,
             &ctx.accounts.jupiter_program,
             &ctx.accounts.wallet_authority,
             &ctx.accounts.token_program,
