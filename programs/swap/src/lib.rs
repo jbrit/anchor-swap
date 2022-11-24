@@ -4,12 +4,15 @@ use jupiter_cpi::cpi;
 use jupiter_cpi::typedefs::Side;
 mod amm;
 mod errors;
+mod swaps;
 use anchor_spl::token::TokenAccount;
 
 declare_id!("BeTX9jpRTDKPUCH3rNuNwERQNp3fHxoE1beFFGeVaicG");
 
 #[program]
 pub mod swap {
+    use crate::swaps::make_generic_swap;
+
     use super::*;
 
     pub fn make_swap<'info>(
@@ -123,6 +126,24 @@ pub mod swap {
             }
             false => err!(errors::SwapError::NotProfitableOpportunity),
         }
+    }
+
+    pub fn generic_swap<'info>(
+        ctx: Context<'_, '_, '_, 'info, GenericSwap<'info>>,
+        exchange_id: u8,
+        in_amount: Option<u64>,
+        minimum_out_amount: u64,
+    ) -> Result<()> {
+        make_generic_swap(
+            exchange_id,
+            0,
+            in_amount,
+            minimum_out_amount,
+            &ctx.accounts.jupiter_program,
+            &ctx.accounts.wallet_authority,
+            &ctx.accounts.token_program,
+            ctx.remaining_accounts,
+        )
     }
 }
 
@@ -345,4 +366,13 @@ impl<'info> AldrinOrca<'info> {
 
         CpiContext::new(cpi_program, cpi_accounts)
     }
+}
+
+#[derive(Accounts)]
+pub struct GenericSwap<'info> {
+    // these accounts are required for all swaps
+    pub jupiter_program: Program<'info, jupiter_cpi::program::Jupiter>,
+    pub wallet_authority: Signer<'info>,
+    /// CHECK: we don't need to read it in our own program, just the cpi
+    pub token_program: UncheckedAccount<'info>,
 }
